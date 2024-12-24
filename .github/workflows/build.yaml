@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build for Linux Architectures
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goarch:
+          - amd64
+          - arm
+    env:
+      GOOS:
+      GOARCH: ${{ matrix.goarch }}
+      GOARM: 7
+      CGO_ENABLED: 0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.4"
+
+      - name: Build
+        run: |
+          mkdir release/
+          go build -o release/xray-json-generator-${{ matrix.goarch }}
+
+      - name: Upload binary file as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-file-${{ matrix.goarch }}
+          path: release/*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binary-file-*
+          path: release/
+          merge-multiple: true
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "Release ${{ github.ref_name }}"
+          files: release/*
