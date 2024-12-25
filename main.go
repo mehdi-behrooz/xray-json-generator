@@ -3,29 +3,37 @@ package main
 import (
     "fmt"
     "os"
+    "time"
     "encoding/json"
     "github.com/xtls/libxray/share"
 )
 
+func handleError(err error) {
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "error: %v\n", err)
+        os.Exit(1)
+    }
+}
+
 func main() {
+
+    // mute the stdout
+    originalStdout := os.Stdout
+    os.Stdout = nil
 
     url := os.Args[1]
 
-    xrayJson, err := share.ConvertShareLinksToXrayJson(url)
+    config, err := share.ConvertShareLinksToXrayJson(url)
+    handleError(err)
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "error: %v\n", err)
-        os.Exit(1)
-    }
+    json, err := json.MarshalIndent(config, "", "    ")
+    handleError(err)
 
-    output, err := json.MarshalIndent(xrayJson, "", "    ")
+    // unmute the stdout
+    time.Sleep(500 * time.Millisecond)
+    os.Stdout = originalStdout
 
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "error: %v\n", err)
-        os.Exit(1)
-    }
-
-    fmt.Println(string(output))
+    os.Stdout.Write(json)
 
 }
 
