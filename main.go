@@ -30,7 +30,7 @@ func main() {
     handleError(err)
 
     // unmute the stdout
-    time.Sleep(500 * time.Millisecond)
+    time.Sleep(50 * time.Millisecond)
     os.Stdout = originalStdout
 
     os.Stdout.Write(json)
