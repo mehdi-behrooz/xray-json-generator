@@ -26,6 +26,8 @@ func main() {
     config, err := share.ConvertShareLinksToXrayJson(url)
     handleError(err)
 
+    config.OutboundConfigs[0].SendThrough = nil
+
     json, err := json.MarshalIndent(config, "", "    ")
     handleError(err)
 
