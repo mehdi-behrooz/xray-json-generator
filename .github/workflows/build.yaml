@@ -9,14 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goarch:
-          - amd64
-          - arm
-    env:
-      GOOS:
-      GOARCH: ${{ matrix.goarch }}
-      GOARM: 7
-      CGO_ENABLED: 0
+        goos: [linux]
+        goarch: [amd64, arm]
+        goarm: [7]
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: amd64.bin
+          - goos: linux
+            goarch: arm
+            goarm: 7
+            suffix: armv7.bin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,14 +32,23 @@ jobs:
           go-version: "1.23.4"
 
       - name: Build
+        env:
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: 7
+          CGO_ENABLED: 0
+          OUTPUT: xray-json-generator
+          VERSION: ${{ github.ref_name }}
+          SUFFIX: ${{ matrix.suffix }}
+
         run: |
           mkdir release/
-          go build -o release/xray-json-generator-${{ matrix.goarch }}
+          go build -o release/${OUTPUT}-${VERSION}-${SUFFIX}
 
       - name: Upload binary file as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: binary-file-${{ matrix.goarch }}
+          name: binary-file-${{ matrix.suffix }}
           path: release/*
 
   release:
