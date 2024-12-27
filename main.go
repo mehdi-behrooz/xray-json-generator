@@ -35,7 +35,7 @@ func main() {
     time.Sleep(50 * time.Millisecond)
     os.Stdout = originalStdout
 
-    os.Stdout.Write(json)
+    fmt.Println(string(json))
 
 }
 
