@@ -10,8 +10,7 @@ jobs:
     strategy:
       matrix:
         goos: [linux]
-        goarch: [amd64, arm]
-        goarm: [7]
+        goarch: [amd64, arm, mipsle]
         include:
           - goos: linux
             goarch: amd64
@@ -20,6 +19,10 @@ jobs:
             goarch: arm
             goarm: 7
             suffix: armv7.bin
+          - goos: linux
+            goarch: mipsle
+            gomips: softfloat
+            suffix: mipsle
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,7 +38,8 @@ jobs:
         env:
           GOOS: linux
           GOARCH: ${{ matrix.goarch }}
-          GOARM: 7
+          GOARM: ${{ matrix.goarm }}
+          GOMIPS: ${{ matrix.gomips }}
           CGO_ENABLED: 0
           OUTPUT: xray-json-generator
           VERSION: ${{ github.ref_name }}
