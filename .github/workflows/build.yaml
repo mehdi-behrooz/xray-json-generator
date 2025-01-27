@@ -22,7 +22,7 @@ jobs:
           - goos: linux
             goarch: mipsle
             gomips: softfloat
-            suffix: mipsle
+            suffix: mipsle.bin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
